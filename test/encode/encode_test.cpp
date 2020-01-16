@@ -10,7 +10,7 @@
 #include <queue>
 #include <filesystem>
 
-#include <serialize/encode.h>
+#include <encode.h>
 
 using namespace std;
 using namespace spiritsaway::serialize;

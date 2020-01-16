@@ -1,7 +1,7 @@
 ﻿#include <iostream>
 #include <iomanip>
-#include <serialize/decode.h>
-#include <serialize/encode.h>
+#include <decode.h>
+#include <encode.h>
 using namespace spiritsaway::serialize;
 template <typename T>
 void decode_test_print(const T& data)
