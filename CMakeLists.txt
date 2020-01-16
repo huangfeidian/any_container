@@ -1,6 +1,6 @@
 
 cmake_minimum_required(VERSION 3.8)
-PROJECT(meta_utility)
+PROJECT(any_container)
 #dependency
 
 

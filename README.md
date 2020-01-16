@@ -1,5 +1,5 @@
-# meta_utility
-some template utility for encode/decode
+# any_conatiner
+a simple json like container, implemented as std::variant.
 ## depends
 
 cpp17
