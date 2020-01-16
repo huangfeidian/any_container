@@ -19,8 +19,8 @@ cpp17
 
 
 ## content
-`encode` convert any primitive type and std container to json
-`decode` decode the json to specific primitive type or std container
-`any_value` a json like container, but support int as key.
+1. `encode` convert any primitive type and std container to json
+2. `decode` decode the json to specific primitive type or std container
+3. `any_value` a json like container, but support int as key.
 
 
