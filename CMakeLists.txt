@@ -19,7 +19,7 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include)
 add_subdirectory(test)
 
 add_library(${CMAKE_PROJECT_NAME} INTERFACE)
-target_include_directories(${CMAKE_PROJECT_NAME} INTERFACE ${nlohmann_json_include_dirs})
+target_include_directories(${CMAKE_PROJECT_NAME} INTERFACE $<INSTALL_INTERFACE:include/${CMAKE_PROJECT_NAME}>)
 target_link_libraries(${CMAKE_PROJECT_NAME} INTERFACE  nlohmann_json::nlohmann_json)
 
 foreach(p LIB INCLUDE)
