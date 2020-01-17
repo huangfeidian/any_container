@@ -70,6 +70,11 @@ namespace spiritsaway::serialize
 			return true;
 		}
 	}
+	static bool decode(const json& data, json& dst)
+	{
+		dst = data;
+		return true;
+	}
 	template <typename T>
 	bool decode(const json& data, std::optional<T>& dst)
 	{
