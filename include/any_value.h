@@ -13,6 +13,8 @@
 
 using json = nlohmann::json;
 
+
+
 #define ANY_NUMERIC_CAL(op_name, op_val) template<typename T>	\
 bool numeric_cal_##op_name(const T& other_value)				\
 {																\
@@ -49,6 +51,17 @@ bool numeric_cal_##op_name(const any_value_type& other_value)	\
 
 namespace spiritsaway::serialize
 {
+	enum class any_type_hash
+	{
+		t_empty = 0,
+		t_int,
+		t_double,
+		t_bool,
+		t_str,
+		t_vec,
+		t_int_map,
+		t_str_map,
+	};
 	using any_int_type = std::int64_t;
     using any_key_type = std::variant<std::string, any_int_type>;
     class any_value_type;
@@ -105,6 +118,10 @@ namespace spiritsaway::serialize
 			base(static_cast<double>(_in_value))
 		{
 
+		}
+		bool is_null() const
+		{
+			return valueless_by_exception();
 		}
 		bool is_int_map() const
 		{
@@ -242,59 +259,59 @@ ANY_NUMERIC_ANY_CAL(multiply)
 ANY_NUMERIC_ANY_CAL(div)
 	
 public:
-friend std::ostream& operator<<(std::ostream& buffer, const any_value_type& cur_value)
-{
-	if (cur_value.is_bool())
+	friend std::ostream& operator<<(std::ostream& buffer, const any_value_type& cur_value)
 	{
-		buffer << std::get<bool>(cur_value);
-	}
-	else if (cur_value.is_int())
-	{
-		buffer << std::get<any_int_type>(cur_value);
-	}
-	else if (cur_value.is_double())
-	{
-		buffer << std::get<double>(cur_value);
-	}
-	else if (cur_value.is_str())
-	{
-		buffer << std::get<std::string>(cur_value);
-	}
-	else if (cur_value.is_vector())
-	{
-		buffer << "[";
-		for (const auto& one_item : std::get<any_vector>(cur_value))
+		if (cur_value.is_bool())
 		{
-			buffer << one_item << ",";
+			buffer << std::get<bool>(cur_value);
 		}
-		buffer << "]";
-	}
-	else if (cur_value.is_str_map())
-	{
-		buffer << "{";
-		for (const auto& one_item : std::get<any_str_map>(cur_value))
+		else if (cur_value.is_int())
 		{
-			buffer <<"("<< one_item.first << ","<<one_item.second<<"), ";
+			buffer << std::get<any_int_type>(cur_value);
 		}
-		buffer << "}";
-	}
-	else if (cur_value.is_int_map())
-	{
-		buffer << "{";
-		for (const auto& one_item : std::get<any_int_map>(cur_value))
+		else if (cur_value.is_double())
 		{
-			buffer << one_item.first << ":" << one_item.second << ", ";
+			buffer << std::get<double>(cur_value);
 		}
-		buffer << "}";
+		else if (cur_value.is_str())
+		{
+			buffer << std::get<std::string>(cur_value);
+		}
+		else if (cur_value.is_vector())
+		{
+			buffer << "[";
+			for (const auto& one_item : std::get<any_vector>(cur_value))
+			{
+				buffer << one_item << ",";
+			}
+			buffer << "]";
+		}
+		else if (cur_value.is_str_map())
+		{
+			buffer << "{";
+			for (const auto& one_item : std::get<any_str_map>(cur_value))
+			{
+				buffer <<"("<< one_item.first << ","<<one_item.second<<"), ";
+			}
+			buffer << "}";
+		}
+		else if (cur_value.is_int_map())
+		{
+			buffer << "{";
+			for (const auto& one_item : std::get<any_int_map>(cur_value))
+			{
+				buffer << one_item.first << ":" << one_item.second << ", ";
+			}
+			buffer << "}";
+		}
+		return buffer;
 	}
-	return buffer;
-}
-std::string to_string() const
-{
-	std::ostringstream buffer;
-	buffer<<*this;
-	return buffer.str();
-}
+	std::string to_string() const
+	{
+		std::ostringstream buffer;
+		buffer<<*this;
+		return buffer.str();
+	}
 	};
 	//template <typename T>
 	//typename std::enable_if<std::is_integral_v<T> && !std::is_same_v<bool, T> && !std::is_same_v<any_int_type, T>, any_value_type>::type 
@@ -456,54 +473,7 @@ std::string to_string() const
 		return any_encode_tuple(_in_value, std::index_sequence_for<Args...>{});
 	}
 
-	static any_value_type any_encode(const json& data)
-	{
-		if (data.is_null())
-		{
-			return any_value_type();
-		}
-		else if (data.is_string())
-		{
-			return data.get<std::string>();
-		}
-		else if (data.is_boolean())
-		{
-			return data.get<bool>();
-		}
-		else if (data.is_number_float())
-		{
-			return double(data.get<float>());
-		}
-		else if (data.is_number_integer())
-		{
-			return static_cast<any_int_type>(data.get<int>());
-		}
-		else if (data.is_number_unsigned())
-		{
-			return data.get<any_int_type>();
-		}
-		else if (data.is_array())
-		{
-			auto result = any_vector();
-			for (const auto& one_item : data)
-			{
-				result.push_back(any_encode(one_item));
-			}
-			return result;
-		}
-		else if (data.is_object())
-		{
-			any_str_map result;
-			for (auto& one_item : data.items())
-			{
-				auto& item_value = one_item.value();
-				result[one_item.key()] = any_encode(item_value);
-
-			}
-			return result;
-		}
-		return any_value_type();
-	}
+	
 	static bool any_decode(const any_value_type& data, any_value_type& dst)
 	{
 		dst = data;
@@ -662,7 +632,140 @@ std::string to_string() const
 	{
 		return (any_decode(data[index], std::get<index>(dst)) && ...);
 	}
+	static any_value_type any_encode(const json& data)
+	{
+		if (data.is_null())
+		{
+			return any_value_type();
+		}
+		else if (data.is_string())
+		{
+			return data.get<std::string>();
+		}
+		else if (data.is_boolean())
+		{
+			return data.get<bool>();
+		}
+		else if (data.is_number_float())
+		{
+			return double(data.get<float>());
+		}
+		else if (data.is_number_integer())
+		{
+			return static_cast<any_int_type>(data.get<int>());
+		}
+		else if (data.is_number_unsigned())
+		{
+			return data.get<any_int_type>();
+		}
+		else if (data.is_array())
+		{
+			if (data.size() < 1)
+			{
+				return any_value_type();
+			}
+			if (!data[0].is_number_integer())
+			{
+				return any_value_type();
+			}
+			auto cur_value_type = data[0].get<int>();
+			switch (cur_value_type)
+			{
+				case static_cast<int>(any_type_hash::t_vec):
+				{
+					any_vector result;
+					for (std::uint32_t i = 1; i < data.size(); i++)
+					{
+						result.push_back(any_encode(data[i]));
+					}
+					return result;
+				}
+				case static_cast<int>(any_type_hash::t_int_map) :
+				{
+					any_int_map result;
+					for (std::uint32_t i = 1; i < data.size(); i++)
+					{
+						const auto& cur_item = data[i];
+						if (!cur_item.is_array())
+						{
+							return any_value_type();
+						}
+						if (cur_item.size() != 2)
+						{
+							return any_value_type();
+						}
+						auto cur_item_key = cur_item[0];
+						if (!cur_item_key.is_number_integer())
+						{
+							return {};
+						}
+						auto cur_item_value = any_encode(cur_item[1]);
+						if (cur_item_value.is_null())
+						{
+							return {};
+						}
 
+						result[cur_item_key.get<int>()] = cur_item_value;
+					}
+					return result;
+				}
+				case static_cast<int>(any_type_hash::t_str_map) :
+				{
+					any_str_map result;
+					for (std::uint32_t i = 1; i < data.size(); i++)
+					{
+						const auto& cur_item = data[i];
+						if (!cur_item.is_array())
+						{
+							return any_value_type();
+						}
+						if (cur_item.size() != 2)
+						{
+							return any_value_type();
+						}
+						auto cur_item_key = cur_item[0];
+						if (!cur_item_key.is_string())
+						{
+							return {};
+						}
+						auto cur_item_value = any_encode(cur_item[1]);
+						if (cur_item_value.is_null())
+						{
+							return {};
+						}
+
+						result[cur_item_key.get<std::string>()] = cur_item_value;
+					}
+					return result;
+				}
+			default:
+				return {};
+			}
+		}
+		else if (data.is_object())
+		{
+			any_str_map result;
+			for (auto& one_item : data.items())
+			{
+				auto& item_value = one_item.value();
+				result[one_item.key()] = any_encode(item_value);
+
+			}
+			return result;
+		}
+		return any_value_type();
+	}
+	static bool decode(const json& data, any_value_type& dst)
+	{
+		if (data.is_null())
+		{
+			dst = any_value_type();
+			return true;
+		}
+		dst = any_encode(data);
+		return !dst.is_null();
+	}
+	
 	static bool any_decode(const any_value_type& data, json& dst)
 	{
 		if (data.is_bool())
@@ -688,6 +791,7 @@ std::string to_string() const
 		else if (data.is_vector())
 		{
 			const auto& cur_vec = std::get<any_vector>(data);
+			dst.push_back(static_cast<int>(any_type_hash::t_vec));
 			for (auto& one_item : cur_vec)
 			{
 				json temp;
@@ -698,23 +802,25 @@ std::string to_string() const
 		}
 		else if (data.is_str_map())
 		{
+			dst.push_back(static_cast<int>(any_type_hash::t_str_map));
 			const auto& cur_vec = std::get<any_str_map>(data);
 			for (auto& one_item : cur_vec)
 			{
 				json temp;
 				any_decode(one_item.second, temp);
-				dst[one_item.first] = temp;
+				dst.push_back(std::make_pair(one_item.first, temp));
 			}
 			return true;
 		}
 		else if (data.is_int_map())
 		{
+			dst.push_back(static_cast<int>(any_type_hash::t_int_map));
 			const auto& cur_vec = std::get<any_int_map>(data);
 			for (auto& one_item : cur_vec)
 			{
 				json temp;
 				any_decode(one_item.second, temp);
-				dst[static_cast<any_int_type>(one_item.first)] = temp;
+				dst.push_back(std::make_pair(one_item.first, temp));
 			}
 			return true;
 		}
@@ -722,6 +828,16 @@ std::string to_string() const
 		{
 			return true;
 		}
+	}
+	static json encode(const any_value_type& data)
+	{
+		json result;
+		if (any_decode(data, result))
+		{
+			return result;
+		}
+		return {};
+
 	}
 }
 

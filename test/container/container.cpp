@@ -47,6 +47,7 @@ void container_encode_print()
 	any_value_type data_9 = "4.0";
 	any_value_type data_10 = std::vector<any_value_type>({ data_5, data_6, data_7 });
 	any_value_type data_11 = any_int_map({ { 1, data_6 }, { 4, data_7 } });
+	any_value_type data_12 = any_str_map({ {"1", data_8}, {"2", data_11} });
 	decode_test_print(data_5);
 	decode_test_print(data_6);
 	decode_test_print(data_7);
@@ -54,6 +55,7 @@ void container_encode_print()
 	decode_test_print(data_9);
 	decode_test_print(data_10);
 	decode_test_print(data_11);
+	decode_test_print(data_12);
 }
 
 
