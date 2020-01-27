@@ -632,6 +632,7 @@ public:
 	{
 		return (any_decode(data[index], std::get<index>(dst)) && ...);
 	}
+	bool any_encode_int_map_array(const json& data, any_int_map& dest);
 	static any_value_type any_encode(const json& data)
 	{
 		if (data.is_null())
@@ -660,90 +661,27 @@ public:
 		}
 		else if (data.is_array())
 		{
-			if (data.size() < 1)
+			any_vector result;
+			for (std::uint32_t i = 0; i < data.size(); i++)
 			{
-				return any_value_type();
+				result.push_back(any_encode(data[i]));
 			}
-			if (!data[0].is_number_integer())
-			{
-				return any_value_type();
-			}
-			auto cur_value_type = data[0].get<int>();
-			switch (cur_value_type)
-			{
-				case static_cast<int>(any_type_hash::t_vec):
-				{
-					any_vector result;
-					for (std::uint32_t i = 1; i < data.size(); i++)
-					{
-						result.push_back(any_encode(data[i]));
-					}
-					return result;
-				}
-				case static_cast<int>(any_type_hash::t_int_map) :
-				{
-					any_int_map result;
-					for (std::uint32_t i = 1; i < data.size(); i++)
-					{
-						const auto& cur_item = data[i];
-						if (!cur_item.is_array())
-						{
-							return any_value_type();
-						}
-						if (cur_item.size() != 2)
-						{
-							return any_value_type();
-						}
-						auto cur_item_key = cur_item[0];
-						if (!cur_item_key.is_number_integer())
-						{
-							return {};
-						}
-						auto cur_item_value = any_encode(cur_item[1]);
-						if (cur_item_value.is_null())
-						{
-							return {};
-						}
-
-						result[cur_item_key.get<int>()] = cur_item_value;
-					}
-					return result;
-				}
-				case static_cast<int>(any_type_hash::t_str_map) :
-				{
-					any_str_map result;
-					for (std::uint32_t i = 1; i < data.size(); i++)
-					{
-						const auto& cur_item = data[i];
-						if (!cur_item.is_array())
-						{
-							return any_value_type();
-						}
-						if (cur_item.size() != 2)
-						{
-							return any_value_type();
-						}
-						auto cur_item_key = cur_item[0];
-						if (!cur_item_key.is_string())
-						{
-							return {};
-						}
-						auto cur_item_value = any_encode(cur_item[1]);
-						if (cur_item_value.is_null())
-						{
-							return {};
-						}
-
-						result[cur_item_key.get<std::string>()] = cur_item_value;
-					}
-					return result;
-				}
-			default:
-				return {};
-			}
+			return result;
 		}
 		else if (data.is_object())
 		{
+			if(data.size() == 1)
+			{
+				auto int_values_iter = data.find("__int_map__");
+				if(int_values_iter != data.end())
+				{
+					any_int_map map_dst;
+					if (any_encode_int_map_array(int_values_iter.value(), map_dst))
+					{
+						return map_dst;
+					}
+				}
+			}
 			any_str_map result;
 			for (auto& one_item : data.items())
 			{
@@ -754,6 +692,32 @@ public:
 			return result;
 		}
 		return any_value_type();
+	}
+	static bool any_encode_int_map_array(const json& data, any_int_map& dest)
+	{
+		if (!data.is_array())
+		{
+			return false;
+		}
+		for (const auto& one_item : data)
+		{
+			if (!one_item.is_array())
+			{
+				return false;
+			}
+			if (one_item.size() != 2)
+			{
+				return false;
+			}
+			if (!one_item[0].is_number_integer())
+			{
+				return false;
+			}
+			auto temp_value = any_encode(one_item[1]);
+			
+			dest[one_item[0].get<int>()] = temp_value;
+		}
+		return true;
 	}
 	static bool decode(const json& data, any_value_type& dst)
 	{
@@ -791,7 +755,6 @@ public:
 		else if (data.is_vector())
 		{
 			const auto& cur_vec = std::get<any_vector>(data);
-			dst.push_back(static_cast<int>(any_type_hash::t_vec));
 			for (auto& one_item : cur_vec)
 			{
 				json temp;
@@ -802,26 +765,26 @@ public:
 		}
 		else if (data.is_str_map())
 		{
-			dst.push_back(static_cast<int>(any_type_hash::t_str_map));
 			const auto& cur_vec = std::get<any_str_map>(data);
 			for (auto& one_item : cur_vec)
 			{
 				json temp;
 				any_decode(one_item.second, temp);
-				dst.push_back(std::make_pair(one_item.first, temp));
+				dst[one_item.first] = temp;
 			}
 			return true;
 		}
 		else if (data.is_int_map())
 		{
-			dst.push_back(static_cast<int>(any_type_hash::t_int_map));
 			const auto& cur_vec = std::get<any_int_map>(data);
+			json::array_t temp_array;
 			for (auto& one_item : cur_vec)
 			{
 				json temp;
 				any_decode(one_item.second, temp);
-				dst.push_back(std::make_pair(one_item.first, temp));
+				temp_array.push_back(std::make_pair(one_item.first, temp));
 			}
+			dst["__int_map__"] = temp_array;
 			return true;
 		}
 		else
