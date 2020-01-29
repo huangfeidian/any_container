@@ -754,6 +754,7 @@ public:
 		}
 		else if (data.is_vector())
 		{
+			dst = json::array_t();
 			const auto& cur_vec = std::get<any_vector>(data);
 			for (auto& one_item : cur_vec)
 			{
@@ -765,6 +766,7 @@ public:
 		}
 		else if (data.is_str_map())
 		{
+			dst = json::object();
 			const auto& cur_vec = std::get<any_str_map>(data);
 			for (auto& one_item : cur_vec)
 			{
@@ -776,6 +778,7 @@ public:
 		}
 		else if (data.is_int_map())
 		{
+			dst = json::object_t();
 			const auto& cur_vec = std::get<any_int_map>(data);
 			json::array_t temp_array;
 			for (auto& one_item : cur_vec)
