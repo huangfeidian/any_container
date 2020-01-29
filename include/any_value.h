@@ -156,7 +156,7 @@ namespace spiritsaway::serialize
 			return is_int() || is_double();
 		}
 		template <typename T>
-		bool numeric_value(T dst) const
+		bool numeric_value(T& dst) const
 		{
 			if (is_int())
 			{
