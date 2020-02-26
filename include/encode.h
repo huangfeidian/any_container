@@ -264,6 +264,7 @@ namespace spiritsaway::serialize
 			return std::visit(visitor, data);
 		}
 	}
+
 	template <typename T1, typename T2>
 	json encode(const std::map<T1, T2>& data)
 	{
@@ -274,6 +275,18 @@ namespace spiritsaway::serialize
 		}
 		return cur_array;
 	}
+
+	template <typename T>
+	json encode(const std::map<std::string, T>& data)
+	{
+		json::object_t result;
+		for (const auto one_item : data)
+		{
+			result[one_item.first] = encode(one_item.second);
+		}
+		return result;
+	}
+
 	template <typename T1, typename T2>
 	json encode(const std::unordered_map<T1, T2>& data)
 	{
@@ -284,6 +297,17 @@ namespace spiritsaway::serialize
 		}
 		return cur_array;
 	}
+	template <typename T>
+	json encode(const std::unordered_map<std::string, T>& data)
+	{
+		json::object_t result;
+		for (const auto one_item : data)
+		{
+			result[one_item.first] = encode(one_item.second);
+		}
+		return result;
+	}
+
 	template <typename T1, typename T2>
 	json encode(const std::multimap<T1, T2>& data)
 	{

@@ -288,6 +288,44 @@ bool decode(const json& data, MAP_TYPE<T1, T2>& dst)				\
 
 
 
+	template <typename T>
+	bool decode(const json& data, std::map<std::string, T>& dst)
+	{
+		if (!data.is_object())
+		{
+			return false;
+		}
+		for (const auto& one_item : data.items())
+		{
+			T temp;
+			if (!decode(one_item.value(), temp))
+			{
+				return false;
+			}
+			dst[one_item.key()] = temp;
+		}
+		return true;
+	}
+
+	template <typename T>
+	bool decode(const json& data, std::unordered_map<std::string, T>& dst)
+	{
+		if (!data.is_object())
+		{
+			return false;
+		}
+		for (const auto& one_item : data.items())
+		{
+			T temp;
+			if (!decode(one_item.value(), temp))
+			{
+				return false;
+			}
+			dst[one_item.key()] = temp;
+		}
+		return true;
+	}
+
 	template <typename... Args>
 	bool decode(const json& data, std::tuple<Args...>& dst)
 	{
