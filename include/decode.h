@@ -25,7 +25,7 @@ namespace spiritsaway::serialize
 
 	static bool decode(const json& data, float& dst)
 	{
-		if (!data.is_number_float())
+		if (!data.is_number())
 		{
 			return false;
 		}
@@ -37,7 +37,7 @@ namespace spiritsaway::serialize
 	}
 	static bool decode(const json& data, double& dst)
 	{
-		if (!data.is_number_float())
+		if (!data.is_number())
 		{
 			return false;
 		}
