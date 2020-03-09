@@ -367,6 +367,12 @@ bool decode(const json& data, MAP_TYPE<T1, T2>& dst)				\
 
 	}
 	template <std::size_t N, typename... Args>
+	bool decode_for_variant_2(const json& data, std::variant<Args...>& dst, std::false_type& tag)
+	{
+		return false;
+	}
+
+	template <std::size_t N, typename... Args>
 	bool decode_for_variant_2(const json& data, std::variant<Args...>& dst, std::true_type& tag)
 	{
 		std::tuple_element_t<N, std::tuple<Args...>> temp;
@@ -381,11 +387,7 @@ bool decode(const json& data, MAP_TYPE<T1, T2>& dst)				\
 			return decode_for_variant_2<N + 1, Args...>(data, dst, std::conditional<N + 1 == std::tuple_size_v<std::tuple<Args...>>, std::false_type, std::true_type>::type());
 		}
 	}
-	template <std::size_t N, typename... Args>
-	bool decode_for_variant_2(const json& data, std::variant<Args...>& dst, std::false_type& tag)
-	{
-		return false;
-	}
+
 	template <typename... Args>
 	bool decode(const json& data, std::variant<Args...>& dst)
 	{
