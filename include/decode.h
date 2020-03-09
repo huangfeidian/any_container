@@ -404,7 +404,7 @@ bool decode(const json& data, MAP_TYPE<T1, T2>& dst)				\
 		return dst.decode(data);
 	}
 	template <typename T>
-	using encode_type = decltype(std::declval<T>.encode());
+	using encode_type = decltype(std::declval<T>().encode());
 	template<typename T1>
 	typename std::enable_if<!std::is_same<encode_type<T1>, json>::value&&encodable<encode_type<T1>>::value, bool>::type decode(const json& data, T1& dst)
 	{
