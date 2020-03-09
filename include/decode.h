@@ -325,7 +325,11 @@ bool decode(const json& data, MAP_TYPE<T1, T2>& dst)				\
 		}
 		return true;
 	}
-
+	template <typename... Args, std::size_t... index>
+	bool decode_for_tuple(const json& data, std::tuple<Args...>& dst, std::index_sequence<index...>)
+	{
+		return (decode(data[index], std::get<index>(dst)) && ...);
+	}
 	template <typename... Args>
 	bool decode(const json& data, std::tuple<Args...>& dst)
 	{
@@ -339,11 +343,7 @@ bool decode(const json& data, MAP_TYPE<T1, T2>& dst)				\
 		}
 		return decode_for_tuple(data, dst, std::index_sequence_for<Args...>{});
 	}
-	template <typename... Args, std::size_t... index>
-	bool decode_for_tuple(const json& data, std::tuple<Args...>& dst, std::index_sequence<index...>)
-	{
-		return (decode(data[index], std::get<index>(dst)) && ...);
-	}
+
 	template <std::size_t N, typename... Args>
 	bool decode_for_variant(const json& data, std::variant<Args...>& dst)
 	{
