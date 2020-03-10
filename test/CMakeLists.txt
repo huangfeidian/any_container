@@ -22,8 +22,4 @@ target_link_libraries(encode_test PUBLIC nlohmann_json::nlohmann_json)
 add_executable(decode_test ${CMAKE_CURRENT_SOURCE_DIR}/decode/decode_test.cpp)
 target_link_libraries(decode_test PUBLIC nlohmann_json::nlohmann_json)
 
-add_executable(container_test ${CMAKE_CURRENT_SOURCE_DIR}/container/container.cpp)
-target_link_libraries(container_test PUBLIC nlohmann_json::nlohmann_json)
 
-add_executable(any_value_test ${CMAKE_CURRENT_SOURCE_DIR}/any_value/any_value.cpp)
-target_link_libraries(any_value_test PUBLIC nlohmann_json::nlohmann_json)
