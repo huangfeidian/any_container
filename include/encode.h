@@ -45,11 +45,22 @@ namespace spiritsaway::serialize
 	};
 
 
-	template <typename T>
-	struct encodable<T, std::void_t<typename std::enable_if<std::is_integral<T>::value>::type>> : std::true_type
-	{
 
-	};
+#define encodable_int(T) template <>\
+struct encodable<T, void>: std::true_type\
+{\
+}\
+
+	encodable_int(int8_t);
+	encodable_int(int16_t);
+	encodable_int(int32_t);
+	encodable_int(int64_t);
+	encodable_int(uint8_t);
+	encodable_int(uint16_t);
+	encodable_int(uint32_t);
+	encodable_int(uint64_t);
+	encodable_int(bool);
+
 	template <>
 	struct encodable<json, void> : std::true_type
 	{
@@ -180,12 +191,29 @@ namespace spiritsaway::serialize
 
 	};
 
-	template <typename T>
-	inline typename std::enable_if<std::is_integral<T>::value, T>::type
-		encode(const T& data)
-	{
-		return data;
-	}
+
+
+
+#define encode_int(T) static T encode(const T& data)\
+{\
+	return data;\
+}\
+
+	encode_int(int8_t);
+	encode_int(int16_t);
+	encode_int(int32_t);
+	encode_int(int64_t);
+	encode_int(uint8_t);
+	encode_int(uint16_t);
+	encode_int(uint32_t);
+	encode_int(uint64_t);
+
+	//template <typename T>
+	//inline typename std::enable_if<std::is_integral<T>::value, T>::type
+	//	encode(const T& data)
+	//{
+	//	return data;
+	//}
 	static bool encode(bool data)
 	{
 		return data;
@@ -206,6 +234,37 @@ namespace spiritsaway::serialize
 	{
 		return data;
 	}
+	// forward declare
+	template <typename T>
+	json encode(const std::optional<T>& data);
+	template <typename T1, typename T2>
+	json encode(const std::pair<T1, T2>& data);
+	template <typename T1, std::size_t T2>
+	json encode(const std::array<T1, T2>& data);
+	template <typename... args>
+	json encode(const std::tuple<args...>& data);
+	template <typename... Args>
+	json encode(const std::variant<Args...>& data);
+	template <typename T1, typename T2>
+	json encode(const std::map<T1, T2>& data);
+	template <typename T1, typename T2>
+	json encode(const std::unordered_map<T1, T2>& data);
+	template <typename T>
+	json encode(const std::unordered_map<std::string, T>& data);
+	template <typename T1, typename T2>
+	json encode(const std::multimap<T1, T2>& data);
+	template <typename T1, typename T2>
+	json encode(const std::unordered_multimap<T1, T2>& data);
+	template <typename T1>
+	json encode(const std::set<T1>& data);
+	template <typename T1>
+	json encode(const std::unordered_set<T1>& data);
+	template <typename T1>
+	json encode(const std::multiset<T1>& data);
+	template <typename T1>
+	json encode(const std::unordered_multiset<T1>& data);
+	template <typename T>
+	inline typename std::enable_if<encodable<decltype(std::declval<T>().encode())>::value, json>::type encode(const T& data);
 	template <typename T>
 	json encode(const std::optional<T>& data)
 	{
@@ -222,13 +281,15 @@ namespace spiritsaway::serialize
 	json encode(const std::pair<T1, T2>& data)
 	{
 
-		json cur_array = json::array({ encode(data.first), encode(data.second) });
+		json::array_t cur_array;
+		cur_array.push_back(encode(data.first));
+		cur_array.push_back(encode(data.second));
 		return cur_array;
 	}
 	template <typename T1, std::size_t T2>
 	json encode(const std::array<T1, T2>& data)
 	{
-		json cur_array = json::array();
+		auto cur_array = json::array_t();
 		for (std::size_t i = 0; i < T2; i++)
 		{
 			cur_array.push_back(encode(data[i]));
@@ -239,7 +300,7 @@ namespace spiritsaway::serialize
 	template <typename tuple_type, std::size_t... index>
 	json encode_tuple(const tuple_type& data, std::index_sequence<index...>)
 	{
-		json cur_array = json::array({ encode(std::get<index>(data))... });
+		auto cur_array = json::array_t({ encode(std::get<index>(data))... });
 		return cur_array;
 	}
 
@@ -268,7 +329,7 @@ namespace spiritsaway::serialize
 	template <typename T1, typename T2>
 	json encode(const std::map<T1, T2>& data)
 	{
-		json cur_array = json::array();
+		auto cur_array = json::array_t();
 		for (const auto& i : data)
 		{
 			cur_array.push_back(std::make_pair<json, json>(encode(i.first), encode(i.second)));
@@ -290,7 +351,7 @@ namespace spiritsaway::serialize
 	template <typename T1, typename T2>
 	json encode(const std::unordered_map<T1, T2>& data)
 	{
-		json cur_array = json::array();
+		auto cur_array = json::array_t();
 		for (const auto& i : data)
 		{
 			cur_array.push_back(std::make_pair<json, json>(encode(i.first), encode(i.second)));
@@ -311,7 +372,7 @@ namespace spiritsaway::serialize
 	template <typename T1, typename T2>
 	json encode(const std::multimap<T1, T2>& data)
 	{
-		json cur_array = json::array();
+		auto cur_array = json::array_t();
 		for (const auto& i : data)
 		{
 			cur_array.push_back(std::make_pair<json, json>(encode(i.first), encode(i.second)));
@@ -321,7 +382,7 @@ namespace spiritsaway::serialize
 	template <typename T1, typename T2>
 	json encode(const std::unordered_multimap<T1, T2>& data)
 	{
-		json cur_array = json::array();
+		auto cur_array = json::array_t();
 		for (const auto& i : data)
 		{
 			cur_array.push_back(std::make_pair<json, json>(encode(i.first), encode(i.second)));
@@ -332,7 +393,7 @@ namespace spiritsaway::serialize
 	template <typename T1>
 	json encode(const std::set<T1>& data)
 	{
-		json cur_array = json::array();
+		auto cur_array = json::array_t();
 		for (const auto& i : data)
 		{
 			cur_array.push_back(encode(i));
@@ -342,7 +403,7 @@ namespace spiritsaway::serialize
 	template <typename T1>
 	json encode(const std::unordered_set<T1>& data)
 	{
-		json cur_array = json::array();
+		auto cur_array = json::array_t();
 		for (const auto& i : data)
 		{
 			cur_array.push_back(encode(i));
@@ -352,7 +413,7 @@ namespace spiritsaway::serialize
 	template <typename T1>
 	json encode(const std::multiset<T1>& data)
 	{
-		json cur_array = json::array();
+		auto cur_array = json::array_t();
 		for (const auto& i : data)
 		{
 			cur_array.push_back(encode(i));
@@ -362,7 +423,7 @@ namespace spiritsaway::serialize
 	template <typename T1>
 	json encode(const std::unordered_multiset<T1>& data)
 	{
-		json cur_array = json::array();
+		auto cur_array = json::array_t();
 		for (const auto& i : data)
 		{
 			cur_array.push_back(encode(i));
@@ -372,7 +433,7 @@ namespace spiritsaway::serialize
 	template <typename T1, std::size_t T2>
 	json encode(const T1(&data)[T2])
 	{
-		json cur_array = json::array();
+		auto cur_array = json::array_t();
 		for (std::size_t i = 0; i < T2; i++)
 		{
 			cur_array.push_back(encode(data[i]));
@@ -382,7 +443,7 @@ namespace spiritsaway::serialize
 	template <typename T>
 	json encode(const std::list<T>& data)
 	{
-		json cur_array = json::array();
+		auto cur_array = json::array_t();
 		for (const auto& i : data)
 		{
 			cur_array.push_back(encode(i));
@@ -392,7 +453,7 @@ namespace spiritsaway::serialize
 	template <typename T>
 	json encode(const std::forward_list<T>& data)
 	{
-		json cur_array = json::array();
+		auto cur_array = json::array_t();
 		for (const auto& i : data)
 		{
 			cur_array.push_back(encode(i));
@@ -402,7 +463,7 @@ namespace spiritsaway::serialize
 	template <typename T>
 	json encode(const std::vector<T>& data)
 	{
-		json cur_array = json::array();
+		auto cur_array = json::array_t();
 		for (const auto& i : data)
 		{
 			cur_array.push_back(encode(i));
@@ -410,14 +471,14 @@ namespace spiritsaway::serialize
 		return cur_array;
 	}
 	template <typename T>
-	inline typename std::enable_if<encodable<decltype(std::declval<T>().encode())>::value, decltype(std::declval<T>().encode())>::type encode(const T& data)
+	inline typename std::enable_if<encodable<decltype(std::declval<T>().encode())>::value, json>::type encode(const T& data)
 	{
-		return data.encode();
+		return encode(data.encode());
 	}
 	template <typename... Args>
 	json encode_multi(const Args&... args)
 	{
-		json cur_array = json::array();
+		auto cur_array = json::array_t();
 		(cur_array.push_back(encode(args)), ...);
 		return cur_array;
 

@@ -57,8 +57,12 @@ void encode_unit_test_data()
 
 	pair<string, string> data_10 = make_pair<string, string>("a,", "b");
 	print_encode_result(data_10);
+	unordered_map<int, float> data_map_1 = {{ 1, 0.5 }, { 2, 0.3 }};
+	unordered_map<int, float> data_map_2 = { { 4, 0.0 }};
 
-	vector<unordered_map<int, float>> data_11 = {{{1, 0.5}, {2, 0.3}}, {{4,0}}};
+	vector<unordered_map<int, float>> data_11;
+	data_11.push_back(data_map_1);
+	data_11.push_back(data_map_2);
 	print_encode_result(data_11);
 
 	int a = 1;
@@ -125,6 +129,7 @@ void encode_multi_test()
 
 int main()
 {
-	encode_unit_test_data();
 	encode_object_test();
+	encode_unit_test_data();
+	
 }

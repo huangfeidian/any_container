@@ -75,6 +75,59 @@ namespace spiritsaway::serialize
 		dst = data;
 		return true;
 	}
+	// forward declare
+	template <typename T>
+	bool decode(const json& data, std::optional<T>& dst);
+	template <typename T>
+	inline typename std::enable_if<std::is_integral<T>::value, bool>::type
+		decode(const json& data, T& dst);
+
+	template<typename T1, typename T2>
+	bool decode(const json& data, std::pair<T1, T2>& dst);
+	template<typename T>
+	bool decode(const json& data, std::vector<T>& dst);
+	template<typename T, std::size_t N>
+	bool decode(const json& data, std::array<T, N>& dst);
+	template<typename T>
+	bool decode(const json& data, std::forward_list<T>& dst);
+	template<typename T>
+	bool decode(const json& data, std::list<T>& dst);
+	template<typename T>
+	bool decode(const json& data, std::set<T>& dst);
+	template<typename T>
+	bool decode(const json& data, std::unordered_set<T>& dst);
+	template<typename T>
+	bool decode(const json& data, std::multiset<T>& dst);
+	template<typename T>
+	bool decode(const json& data, std::unordered_multiset<T>& dst);
+	template<typename K, typename V>
+	bool decode(const json& data, std::map<K, V>& dst);
+	template<typename K, typename V>
+	bool decode(const json& data, std::unordered_map<K, V>& dst);
+	template<typename K, typename V>
+	bool decode(const json& data, std::multimap<K, V>& dst);
+	template<typename K, typename V>
+	bool decode(const json& data, std::unordered_multimap<K, V>& dst);
+	template <typename... Args>
+	bool decode(const json& data, std::variant<Args...>& dst);
+	template <typename... Args>
+	bool decode(const json& data, std::tuple<Args...>& dst);
+		template <typename T>
+	bool decode(const json& data, std::map<std::string, T>& dst);
+		template <typename T>
+	bool decode(const json& data, std::unordered_map<std::string, T>& dst);
+		template <typename T>
+	using encode_type = decltype(std::declval<T>().encode());
+	template<typename T1>
+	typename std::enable_if<!std::is_same<encode_type<T1>, json>::value&&encodable<encode_type<T1>>::value, bool>::type decode(const json& data, T1& dst);
+		template <typename T1, typename T2>
+	typename std::enable_if<
+		std::is_same<
+		decltype(std::declval<T1>().decode(std::declval<T2>())),
+		bool>::value,
+		bool>::type decode(const T2& data, T1& dst);
+	// forward declare end
+
 	template <typename T>
 	bool decode(const json& data, std::optional<T>& dst)
 	{
@@ -405,8 +458,7 @@ bool decode(const json& data, MAP_TYPE<T1, T2>& dst)				\
 		// for class T1 with function bool decode(const T2& data)
 		return dst.decode(data);
 	}
-	template <typename T>
-	using encode_type = decltype(std::declval<T>().encode());
+
 	template<typename T1>
 	typename std::enable_if<!std::is_same<encode_type<T1>, json>::value&&encodable<encode_type<T1>>::value, bool>::type decode(const json& data, T1& dst)
 	{
