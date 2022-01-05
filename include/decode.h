@@ -476,23 +476,32 @@ bool decode(const json& data, MAP_TYPE<T1, T2>& dst)				\
 		}
 	}
 	template <typename... Args, std::size_t... idx>
-	bool decode_multi_impl(const json& data, std::index_sequence<idx...> indexes, Args&... dsts)
+	bool decode_multi_impl(const std::vector<json>& data, std::index_sequence<idx...> indexes, Args&... dsts)
 	{
-		if (!data.is_array())
-		{
-			return false;
-		}
 		if (data.size() != std::tuple_size_v<std::tuple<Args...>>)
 		{
 			return false;
+		}
+		if(data.empty())
+		{
+			return true;
 		}
 		return ((decode(data[idx], dsts)) &&...);
 	}
 	template <typename... Args>
 	bool decode_multi(const json& data, Args&... dsts)
 	{
+		if(!data.is_array())
+		{
+			return false;
+		}
 		return decode_multi_impl<Args...>(data, std::index_sequence_for<Args...>{}, dsts...);
 	}
+	template <typename... Args>
+        bool decode_multi(const std::vector<json>& data, Args&... dsts)
+        {
+                return decode_multi_impl<Args...>(data, std::index_sequence_for<Args...>{}, dsts...);
+        }
 	static bool decode_multi(const json& data)
 	{
 		return true;
