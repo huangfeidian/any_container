@@ -75,6 +75,15 @@ void decode_test_std_container()
 	std::unordered_set<int> data_20 = { 1, 2, 3, 4 };
 	decode_test_print(data_20);
 
+	json::object_t data_21 = {
+		{"aaa", 1}
+	};
+	decode_test_print(data_21);
+
+	json::array_t data_22 = { "lalal", 1 };
+	decode_test_print(data_22);
+
+
 }
 struct c_1
 {

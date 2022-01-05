@@ -70,6 +70,26 @@ namespace spiritsaway::serialize
 			return true;
 		}
 	}
+	static bool decode(const json& data, json::object_t& dst)
+	{
+		if (!data.is_object())
+		{
+			return false;
+		}
+		dst = data.get<json::object_t>();
+		return true;
+	}
+
+	static bool decode(const json& data, json::array_t& dst)
+	{
+		if (!data.is_array())
+		{
+			return false;
+		}
+		dst = data.get<json::array_t>();
+		return true;
+	}
+
 	static bool decode(const json& data, json& dst)
 	{
 		dst = data;
