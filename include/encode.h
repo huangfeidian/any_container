@@ -237,6 +237,8 @@ struct encodable<T, void>: std::true_type\
 	// forward declare
 	template <typename T>
 	json encode(const std::optional<T>& data);
+	template <typename T>
+	json encode(const std::vector<T>& data);
 	template <typename T1, typename T2>
 	json encode(const std::pair<T1, T2>& data);
 	template <typename T1, std::size_t T2>
