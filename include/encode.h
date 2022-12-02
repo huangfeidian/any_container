@@ -281,7 +281,8 @@ struct encodable<T, void>: std::true_type\
 	json encode(const std::pair<T1, T2>& data)
 	{
 
-		json::array_t cur_array;
+		json cur_array = json::array();
+		cur_array.get_ptr<json::array_t*>()->reserve(2);
 		cur_array.push_back(encode(data.first));
 		cur_array.push_back(encode(data.second));
 		return cur_array;
@@ -289,7 +290,8 @@ struct encodable<T, void>: std::true_type\
 	template <typename T1, std::size_t T2>
 	json encode(const std::array<T1, T2>& data)
 	{
-		auto cur_array = json::array_t();
+		json cur_array = json::array();
+		cur_array.get_ptr<json::array_t*>()->reserve(T2);
 		for (std::size_t i = 0; i < T2; i++)
 		{
 			cur_array.push_back(encode(data[i]));
@@ -300,7 +302,9 @@ struct encodable<T, void>: std::true_type\
 	template <typename tuple_type, std::size_t... index>
 	json encode_tuple(const tuple_type& data, std::index_sequence<index...>)
 	{
-		auto cur_array = json::array_t({ encode(std::get<index>(data))... });
+		json cur_array = json::array();
+		cur_array.get_ptr<json::array_t*>()->reserve(std::tuple_size_v<tuple_type>);
+		(cur_array.push_back(encode(std::get<index>(data))), ...);
 		return cur_array;
 	}
 
@@ -329,10 +333,11 @@ struct encodable<T, void>: std::true_type\
 	template <typename T1, typename T2>
 	json encode(const std::map<T1, T2>& data)
 	{
-		auto cur_array = json::array_t();
+		json cur_array = json::array();
+		cur_array.get_ptr<json::array_t*>()->reserve(data.size());
 		for (const auto& i : data)
 		{
-			cur_array.push_back(std::make_pair<json, json>(encode(i.first), encode(i.second)));
+			cur_array.push_back(encode(i));
 		}
 		return cur_array;
 	}
@@ -351,10 +356,11 @@ struct encodable<T, void>: std::true_type\
 	template <typename T1, typename T2>
 	json encode(const std::unordered_map<T1, T2>& data)
 	{
-		auto cur_array = json::array_t();
+		json cur_array = json::array();
+		cur_array.get_ptr<json::array_t*>()->reserve(data.size());
 		for (const auto& i : data)
 		{
-			cur_array.push_back(std::make_pair<json, json>(encode(i.first), encode(i.second)));
+			cur_array.push_back(encode(i));
 		}
 		return cur_array;
 	}
@@ -372,20 +378,22 @@ struct encodable<T, void>: std::true_type\
 	template <typename T1, typename T2>
 	json encode(const std::multimap<T1, T2>& data)
 	{
-		auto cur_array = json::array_t();
+		json cur_array = json::array();
+		cur_array.get_ptr<json::array_t*>()->reserve(data.size());
 		for (const auto& i : data)
 		{
-			cur_array.push_back(std::make_pair<json, json>(encode(i.first), encode(i.second)));
+			cur_array.push_back(encode(i));
 		}
 		return cur_array;
 	}
 	template <typename T1, typename T2>
 	json encode(const std::unordered_multimap<T1, T2>& data)
 	{
-		auto cur_array = json::array_t();
+		json cur_array = json::array();
+		cur_array.get_ptr<json::array_t*>()->reserve(data.size());
 		for (const auto& i : data)
 		{
-			cur_array.push_back(std::make_pair<json, json>(encode(i.first), encode(i.second)));
+			cur_array.push_back(encode(i));
 		}
 		return cur_array;
 	}
@@ -393,7 +401,8 @@ struct encodable<T, void>: std::true_type\
 	template <typename T1>
 	json encode(const std::set<T1>& data)
 	{
-		auto cur_array = json::array_t();
+		json cur_array = json::array();
+		cur_array.get_ptr<json::array_t*>()->reserve(data.size());
 		for (const auto& i : data)
 		{
 			cur_array.push_back(encode(i));
@@ -403,7 +412,8 @@ struct encodable<T, void>: std::true_type\
 	template <typename T1>
 	json encode(const std::unordered_set<T1>& data)
 	{
-		auto cur_array = json::array_t();
+		json cur_array = json::array();
+		cur_array.get_ptr<json::array_t*>()->reserve(data.size());
 		for (const auto& i : data)
 		{
 			cur_array.push_back(encode(i));
@@ -413,7 +423,8 @@ struct encodable<T, void>: std::true_type\
 	template <typename T1>
 	json encode(const std::multiset<T1>& data)
 	{
-		auto cur_array = json::array_t();
+		json cur_array = json::array();
+		cur_array.get_ptr<json::array_t*>()->reserve(data.size());
 		for (const auto& i : data)
 		{
 			cur_array.push_back(encode(i));
@@ -423,7 +434,8 @@ struct encodable<T, void>: std::true_type\
 	template <typename T1>
 	json encode(const std::unordered_multiset<T1>& data)
 	{
-		auto cur_array = json::array_t();
+		json cur_array = json::array();
+		cur_array.get_ptr<json::array_t*>()->reserve(data.size());
 		for (const auto& i : data)
 		{
 			cur_array.push_back(encode(i));
@@ -433,7 +445,8 @@ struct encodable<T, void>: std::true_type\
 	template <typename T1, std::size_t T2>
 	json encode(const T1(&data)[T2])
 	{
-		auto cur_array = json::array_t();
+		json cur_array = json::array();
+		cur_array.get_ptr<json::array_t*>()->reserve(T2);
 		for (std::size_t i = 0; i < T2; i++)
 		{
 			cur_array.push_back(encode(data[i]));
@@ -443,7 +456,8 @@ struct encodable<T, void>: std::true_type\
 	template <typename T>
 	json encode(const std::list<T>& data)
 	{
-		auto cur_array = json::array_t();
+		json cur_array = json::array();
+		cur_array.get_ptr<json::array_t*>()->reserve(data.size());
 		for (const auto& i : data)
 		{
 			cur_array.push_back(encode(i));
@@ -453,7 +467,8 @@ struct encodable<T, void>: std::true_type\
 	template <typename T>
 	json encode(const std::forward_list<T>& data)
 	{
-		auto cur_array = json::array_t();
+		json cur_array = json::array();
+		cur_array.get_ptr<json::array_t*>()->reserve(std::distance(data.cbegin(), data.cend()));
 		for (const auto& i : data)
 		{
 			cur_array.push_back(encode(i));
@@ -463,7 +478,8 @@ struct encodable<T, void>: std::true_type\
 	template <typename T>
 	json encode(const std::vector<T>& data)
 	{
-		auto cur_array = json::array_t();
+		json cur_array = json::array();
+		cur_array.get_ptr<json::array_t*>()->reserve(data.size());
 		for (const auto& i : data)
 		{
 			cur_array.push_back(encode(i));
@@ -478,7 +494,8 @@ struct encodable<T, void>: std::true_type\
 	template <typename... Args>
 	json encode_multi(const Args&... args)
 	{
-		auto cur_array = json::array_t();
+		json cur_array = json::array();
+		cur_array.get_ptr<json::array_t*>()->reserve(sizeof...(Args));
 		(cur_array.push_back(encode(args)), ...);
 		return cur_array;
 

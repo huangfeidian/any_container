@@ -10,7 +10,7 @@ void decode_test_print(const T& data)
 	json encode_data = encode(data);
 	std::cout << std::setw(4) << "encode result " << encode_data << std::endl;
 	bool decode_result = decode(encode_data, dst);
-	std::cout<<"decode result " <<  decode_result << " with encode result "<<json(encode(dst))<< std::endl;
+	std::cout<<"decode result " <<  decode_result << " with encode result "<<json(encode(dst))<< " compare result "<<(dst == data)<< std::endl;
 }
 void decode_test_primitive()
 {
@@ -122,7 +122,10 @@ struct c_1
 		}
 		return true;
 	}
-
+	bool operator==(const c_1& other) const
+	{
+		return a == other.a && b == other.b && c == other.c;
+	}
 };
 struct c_2
 {
@@ -135,6 +138,10 @@ struct c_2
 	{
 		b = data;
 		return true;
+	}
+	bool operator==(const c_2& other) const
+	{
+		return b == other.b;
 	}
 };
 void decode_test_custom()
@@ -150,4 +157,7 @@ int main()
 	decode_test_primitive();
 	decode_test_std_container();
 	decode_test_custom();
+	
+
+	return 1;
 }
