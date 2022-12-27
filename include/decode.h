@@ -49,14 +49,23 @@ namespace spiritsaway::serialize
 	}
 	static bool decode(const json& data, bool& dst)
 	{
-		if (!data.is_boolean())
-		{
-			return false;
-		}
+
+		if (data.is_boolean())
 		{
 			dst = data.get<bool>();
 			return true;
 		}
+		if (data.is_number_unsigned())
+		{
+			std::uint64_t cur_int_v = data.get<std::uint64_t>();
+			if (cur_int_v > 1)
+			{
+				return false;
+			}
+			return !!cur_int_v;
+
+		}
+		return false;
 	}
 	static bool decode(const json& data, std::string& dst)
 	{
