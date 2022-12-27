@@ -62,7 +62,8 @@ namespace spiritsaway::serialize
 			{
 				return false;
 			}
-			return !!cur_int_v;
+			dst = !!cur_int_v;
+			return true;
 
 		}
 		return false;
