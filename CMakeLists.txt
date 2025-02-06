@@ -18,9 +18,9 @@ find_package(nlohmann_json CONFIG REQUIRED)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include)
 add_subdirectory(test)
 
-add_library(${CMAKE_PROJECT_NAME} INTERFACE)
-target_include_directories(${CMAKE_PROJECT_NAME} INTERFACE $<INSTALL_INTERFACE:include>)
-target_link_libraries(${CMAKE_PROJECT_NAME} INTERFACE  nlohmann_json::nlohmann_json)
+add_library(${PROJECT_NAME} INTERFACE)
+target_include_directories(${PROJECT_NAME} INTERFACE $<INSTALL_INTERFACE:include>)
+target_link_libraries(${PROJECT_NAME} INTERFACE  nlohmann_json::nlohmann_json)
 
 foreach(p LIB INCLUDE)
 	set(var CMAKE_INSTALL_${p}DIR)
@@ -30,16 +30,16 @@ foreach(p LIB INCLUDE)
 	endif()
 endforeach()
 
-export(TARGETS ${CMAKE_PROJECT_NAME}
-     FILE ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}Targets.cmake)
+export(TARGETS ${PROJECT_NAME}
+     FILE ${CMAKE_BINARY_DIR}/${PROJECT_NAME}Targets.cmake)
 
 file(WRITE
-    ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}Config.cmake
-    "include(\${CMAKE_CURRENT_LIST_DIR}/${CMAKE_PROJECT_NAME}Targets.cmake)\n")
+    ${CMAKE_BINARY_DIR}/${PROJECT_NAME}Config.cmake
+    "include(\${CMAKE_CURRENT_LIST_DIR}/${PROJECT_NAME}Targets.cmake)\n")
 
 install(FILES
-        ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}Config.cmake
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${CMAKE_PROJECT_NAME})
+        ${CMAKE_BINARY_DIR}/${PROJECT_NAME}Config.cmake
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
 
 install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Targets
    ARCHIVE  DESTINATION lib
@@ -48,5 +48,5 @@ install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Targets
 
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/ DESTINATION include/${PROJECT_NAME})
 
-install(EXPORT ${CMAKE_PROJECT_NAME}Targets
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${CMAKE_PROJECT_NAME})
+install(EXPORT ${PROJECT_NAME}Targets
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
