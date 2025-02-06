@@ -15,7 +15,7 @@ endif(MSVC)
 # add json support
 find_package(nlohmann_json CONFIG REQUIRED)
 
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include)
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/include)
 add_subdirectory(test)
 
 add_library(${PROJECT_NAME} INTERFACE)
@@ -46,7 +46,7 @@ install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Targets
    LIBRARY DESTINATION lib
   )
 
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/ DESTINATION include/${PROJECT_NAME})
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/ DESTINATION include/${PROJECT_NAME})
 
 install(EXPORT ${PROJECT_NAME}Targets
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
