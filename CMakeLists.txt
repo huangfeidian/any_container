@@ -16,11 +16,19 @@ endif(MSVC)
 find_package(nlohmann_json CONFIG REQUIRED)
 
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/include)
-add_subdirectory(test)
+
 
 add_library(${PROJECT_NAME} INTERFACE)
 target_include_directories(${PROJECT_NAME} INTERFACE $<INSTALL_INTERFACE:include>)
 target_link_libraries(${PROJECT_NAME} INTERFACE  nlohmann_json::nlohmann_json)
+
+if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+  set(IS_TOPLEVEL_PROJECT TRUE)
+else()
+  set(IS_TOPLEVEL_PROJECT FALSE)
+endif()
+
+if(IS_TOPLEVEL_PROJECT)
 
 foreach(p LIB INCLUDE)
 	set(var CMAKE_INSTALL_${p}DIR)
@@ -50,3 +58,7 @@ install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/ DESTINATION include/${PRO
 
 install(EXPORT ${PROJECT_NAME}Targets
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
+
+add_subdirectory(test)
+
+endif(IS_TOPLEVEL_PROJECT)
